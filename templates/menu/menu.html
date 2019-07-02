@@ -1,0 +1,3 @@
+{% for branch in branches %}
+<div data-branch_level='{{ branch.level_cached }}' class="{% if branch in open_branches %}open{% endif %}{% if branch.slug_cached == current_slug %} active{% endif %}" style="margin-left:calc({{ branch.level_cached }} * 1em);"><a href="{{ branch.url_cached }}">{{ branch.title }}</a></div>
+{% endfor %}

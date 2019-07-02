@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% load staticfiles %}
+
+{% block page_title %}Menus{% endblock page_title %}
+
+{% block body %}
+<h1>Menu DEBUG Page</h1>
+<hr/>
+{% if menues %}
+    <ul>
+    {% for menu in menues %}
+        <li>{{ menu }} // {{ menu.compiled_menu }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+<p>No menues for now</p>
+{% endif %}
+{% endblock body %}
