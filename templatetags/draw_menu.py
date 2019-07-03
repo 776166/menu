@@ -46,8 +46,9 @@ def make_menu_data(path, name):
     """ Compile data to render menu """
 
     """ New Correct caching """
-    if not cache.get(name) is None:
-        queryset_cached = cache.get(name)
+    menu_cache = cache.get(name)
+    if not menu_cache is None:
+        queryset_cached = menu_cache
     else:
         cache.set(name, list(Branch.objects.filter(menu__name=name).values()))
         queryset_cached = cache.get(name)
@@ -126,15 +127,60 @@ def make_menu_data(path, name):
     # return compiled_menu, current_branch, current_slug, open_branches
     return compiled_menu_cached, current_branch, current_slug, open_branches
 
-@register.inclusion_tag('menu/menu.html', takes_context=True)
+""" Cached tag """
+@register.simple_tag(takes_context=True)
 def draw_menu(context, name):
-    path = context['request'].path
+    from django.template import Context
+    import hashlib 
     
-    compiled_menu, current_branch, current_slug, open_branches = make_menu_data(path, name)
+    path = context['request'].path
+    cache_name = '%s_%s_generated' % (name,hashlib.md5(path.encode()).hexdigest())
 
-    return {
-        'branches':compiled_menu,
-        'current_branch': current_branch,
-        'current_slug': current_slug,
-        'open_branches': open_branches,
-        }
+    template_cache = cache.get(cache_name)
+    if template_cache is None:
+        print('Generating template_cache', cache_name)
+        path = context['request'].path
+        compiled_menu, current_branch, current_slug, open_branches = make_menu_data(path, name)
+        t = context.template.engine.get_template('menu/menu_tag.html')
+        rendered =  t.render(
+            Context({
+                'branches':compiled_menu,
+                'current_branch': current_branch,
+                'current_slug': current_slug,
+                'open_branches': open_branches,
+                },
+                autoescape=context.autoescape))
+        cache.set(cache_name, rendered)
+        return rendered
+    else:
+        print('Use pregenerated template cache', cache_name)
+        return template_cache
+        # return cache.get(cache_name)
+    # print(cache.get(cache_name))
+    # print(rendered)
+
+    #
+    # compiled_menu, current_branch, current_slug, open_branches = make_menu_data(path, name)
+    #
+    # return {
+    #     'branches':compiled_menu,
+    #     'current_branch': current_branch,
+    #     'current_slug': current_slug,
+    #     'open_branches': open_branches,
+    #     }
+    # return None
+
+
+# """ Not cahed tag"""
+# @register.inclusion_tag('menu/menu_tag.html', takes_context=True)
+# def draw_menu(context, name):
+#     path = context['request'].path
+#
+#     compiled_menu, current_branch, current_slug, open_branches = make_menu_data(path, name)
+#
+#     return {
+#         'branches':compiled_menu,
+#         'current_branch': current_branch,
+#         'current_slug': current_slug,
+#         'open_branches': open_branches,
+#         }
