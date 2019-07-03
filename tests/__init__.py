@@ -91,7 +91,7 @@ class CommonTests(TestCase):
         compiled_menu, current_branch, current_slug, open_branches = make_menu_data('/foo/bar/', 'foo')
         self.assertTupleEqual(
             (compiled_menu, current_branch, current_slug, open_branches),
-            (None, None, None, None)
+            ([], None, None, [])
             )
         
         """ Correct menu on not matchin url """
@@ -105,34 +105,44 @@ class CommonTests(TestCase):
         compiled_menu, current_branch, current_slug, open_branches = make_menu_data(
             '/equestria/fluttershy/fans/',
             'mlp')
+        menu_list = []
+        for branch in compiled_menu:
+            menu_list.append(branch['slug_cached'])
+
+        open_branches_list = []
+        for branch in open_branches:
+            # print('== ', branch['slug_cached'])
+            open_branches_list.append(branch['slug_cached'])
+
         self.assertListEqual(
             [
-                Branch.objects.get(slug_cached="/equestria/"),
-                Branch.objects.get(slug_cached="/equestria/fluttershy/"),
-                Branch.objects.get(slug_cached="/equestria/fluttershy/fans/"),
-                Branch.objects.get(slug_cached="/equestria/fluttershy/fans/brony1/"),
-                Branch.objects.get(slug_cached="/equestria/fluttershy/fans/brony1/shed/"),
-                Branch.objects.get(slug_cached="/equestria/fluttershy/fans/brony2/"),
+                "/equestria/",
+                "/equestria/fluttershy/",
+                "/equestria/fluttershy/fans/",
+                "/equestria/fluttershy/fans/brony1/",
+                "/equestria/fluttershy/fans/brony1/shed/",
+                "/equestria/fluttershy/fans/brony2/",
             ],
-            compiled_menu
+            menu_list
         )
         self.assertEqual(
-            Branch.objects.get(slug_cached="/equestria/fluttershy/fans/"),
-            current_branch
+            "/equestria/fluttershy/fans/",
+            current_branch['slug_cached']
         )
         self.assertEqual(
             "/equestria/fluttershy/fans/",
             current_slug
         )
+        # print(sorted(open_branches_list))
         self.assertListEqual(
             [
-                Branch.objects.get(slug_cached="/equestria/fluttershy/fans/"),
-                Branch.objects.get(slug_cached="/equestria/fluttershy/fans/brony1/"),
-                Branch.objects.get(slug_cached="/equestria/fluttershy/fans/brony2/"),
-                Branch.objects.get(slug_cached="/equestria/fluttershy/"),
-                Branch.objects.get(slug_cached="/equestria/"),
+                "/equestria/",
+                "/equestria/fluttershy/",
+                "/equestria/fluttershy/fans/",
+                "/equestria/fluttershy/fans/brony1/",
+                "/equestria/fluttershy/fans/brony2/",
             ],
-            open_branches
+            sorted(open_branches_list)
         )
 
     # @override_settings(ROOT_URLCONF='menu.tests.urls')

@@ -153,7 +153,7 @@ class Branch(models.Model):
             if self.url_cached != url_cached:
                 self.url_cached = url_cached
             self.save()
-            print('Clean Cache', self.menu.name)
+            # print('Clean Cache', self.menu.name)
             cache.delete(self.menu.name)
 
 
@@ -178,7 +178,7 @@ def set_branch_cached_values(sender, instance, **kwargs):
             instance.url_cached = url_cached
         if instance.level_cached != level_cached:
             instance.level_cached = level_cached
-        print('Clean Cache', instance.menu.name)
+        # print('Clean Cache', instance.menu.name)
         cache.delete(instance.menu.name)
 
     if instance.parent == instance:
